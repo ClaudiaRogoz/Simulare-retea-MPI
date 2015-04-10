@@ -1,0 +1,44 @@
+Tema 4 APD
+Rogoz Claudia
+331CA
+
+Tema a constat in simularea unei retele in MPI. 
+
+Fisierele temei:
+	-> tema4.cpp
+	-> Makefile: exista 2 reguli-> run: topologie fara cicluri; run2: topologie cu cicluri
+	-> topologie2.txt: contine lista de vecini; topologie cu cicluri
+	-> topologie.txt: contine lista de vecini; topologie fara cicluri
+	-> mesaje.txt: contine mesajele care trebuie transmise
+	-> README
+
+In urma rularii: mpirun -np 12 topologie2.txt mesaje.txt
+	vor rezulta 12 fisiere rank[nr_rank].txt, fiecare cu propria tabela de rutare
+	In fisierul rank0.txt se gaseste atat tabela proprie de rurtare, cat si matricea de adiacenta finala. 
+
+	Toate tabelele de rutare si matricea de adiacenta pot fi gasite in fisierul etapa1.txt 
+
+1. Etapa 1
+
+	Toate nodurile se initializau, isi citeau vecinii din fisierul cu topologie dat ca argument si apoi citeau si mesajele pe care trebuie sa le transmita (pentru ETAPA 2).
+
+	Se retin vecinii in array-ul: "vecini", iar numarul de vecini in line.
+	Stabilirea topologiei:
+
+	Initializatorul, procesul cu rank-ul 0, trimite mesaj catre toti vecinii sai.
+	Asteapta apoi mesajele de raspuns de la vecini. Un mesaj de raspuns este reprezentat prin tabela de rutare. Daca in tabela de rutare primita, rank 0 gaseste o cale catre un anumit nod, se updateaza.
+	Analog si pentru celalalte procese. Fiecare proces primeste un mesaj de lungime 1. Primul astfel de mesaj va fi considerat cel dat de parinte. Restul sunt considerate ca apartinand unui ciclu si nu se iau in considerare. procesele frunza initiaza ropagarea tabelelor in sus.
+	La final si vecinii se updateaza(folositor pentru ultima etapa), astfel se elimina peste tot ciclurile.
+
+	Tabelele de rutare sunt afisate separat pentru fiecare proces.
+2.Etapa 2
+	
+	Se trimit mesaje broadcast pentru initializare. Pe baza tabelei de rutare, se socoteste atat urmatorul hop, cat si nr de mesaje care vor trece prin acel nod.
+	Nr de mesaje total care mai trebuie sa treaca prinnod = bcount. 
+	Pentru fiecare destinatie se socotesc nr de mesaje care vor trece prin acel nod.
+	Trimiterea mesajelor propriu-zise se face asemanator cu cele de broadcast. 
+	Dupa ce fiecare proces trimite mesajele din lista sa, initiaza procesul de inchidere al mesajelor prin broadcast. 
+
+3.Etapa3
+
+	Fiecare proces isi creeaza o tabela de numtasks size si isi va vota candidatul. Nodurile frunza trmit apoi catre parinte tabela lor de voturi. Voturile se acumuleaza. Cand tabela de voturi ajunge la rank 0, acesta calculeaza cele mai mari 2 valori pentru presedinte si vicepresedinte, urmand ca apoi sa propage aceasta informatie catre toate nodurile. 
